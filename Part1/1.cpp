@@ -6,39 +6,41 @@
 #include <cctype>
 #include <deque>
 
+using namespace std;
+
 // Function to parse input file.
 // Takes a queue by reference.
-void parseFile(std::deque<std::string> &q)
+void parseFile(deque<string> &q)
 {
-	std::fstream fIn, fOut;
-	std::string line;
+	fstream fIn, fOut;
+	string line;
 
 	// Our input file is "p1.txt".
-	fIn.open("finalp1.txt", std::ios::in);
+	fIn.open("finalp1.txt", ios::in);
 
-	while (std::getline(fIn, line))
+	while (getline(fIn, line))
 	{
 		// Declare regex patterns.
-		std::regex whitespace("[\\s]+");			// Looks for one or more whitespace chars.
-		std::regex leadingSpace("^(\\s+)");			// Looks for one or more leading spaces.
-		std::regex semiColonNewLine("(\\s*;\\s*)");	// Looks for ';' surrounded by zero or more spaces.
-		std::regex comments("(((\\(\\*.*\\*\\))|(\\(\\*.*))|(.*\\*\\)))");	// Looks for comments.
-		std::regex reservedWords("((var)|(begin))");	// Looks for reserved words.
-		std::regex endWord("(end\\.)");	// Looks for "end.".
+		regex whitespace("[\\s]+");			// Looks for one or more whitespace chars.
+		regex leadingSpace("^(\\s+)");			// Looks for one or more leading spaces.
+		regex semiColonNewLine("(\\s*;\\s*)");	// Looks for ';' surrounded by zero or more spaces.
+		regex comments("(((\\(\\*.*\\*\\))|(\\(\\*.*))|(.*\\*\\)))");	// Looks for comments.
+		regex reservedWords("((var)|(begin))");	// Looks for reserved words.
+		regex endWord("(end\\.)");	// Looks for "end.".
 
 		// Process line with regex.
         // Replaces 'line' with single whitespace.
-		line = std::regex_replace(line, whitespace, " ");			
+		line = regex_replace(line, whitespace, " ");			
         // Replaces 'line' in order to not have leading spaces.
-		line = std::regex_replace(line, leadingSpace, "");
+		line = regex_replace(line, leadingSpace, "");
         // Replaces 'line' with lines that have semicolons then newline.
-		line = std::regex_replace(line, semiColonNewLine, " ;\n");
+		line = regex_replace(line, semiColonNewLine, " ;\n");
 		// Replaces 'line' with "end." plus newline.
-		line = std::regex_replace(line, endWord, "end.\n");
+		line = regex_replace(line, endWord, "end.\n");
 		// Replaces 'line' with nothing because of comments.
-		line = std::regex_replace(line, comments, "");
+		line = regex_replace(line, comments, "");
 		// Replaces 'line' with the itself plus newline.
-		line = std::regex_replace(line, reservedWords, line+"\n");
+		line = regex_replace(line, reservedWords, line+"\n");
 
 		// Check if the lines starts with a comment, if so, proceed; does not get pushed to queue.
 		if (line[0] == '(' && line[1] == '*')
@@ -47,7 +49,7 @@ void parseFile(std::deque<std::string> &q)
 		}
 
 		// Rebuild 'line' using temporary string variable.
-		std::string temp = "";
+		string temp = "";
 
 		// Process each line by character manually.
 		for (int i = 0; i < line.length(); ++i)
@@ -120,18 +122,18 @@ void parseFile(std::deque<std::string> &q)
 // Function to pluck each significant word in a .cpp file.
 void pluckFile()
 {
-	std::string line;
-	std::deque<std::string> q;
-	std::fstream f;
+	string line;
+	deque<string> q;
+	fstream f;
 
 	// Opens the same file we just parsed.
 	f.open("newfile.txt");
 
 	// Iterating through every line in the file...
-	while(std::getline(f, line))
+	while(getline(f, line))
 	{
-		std::string word;
-		std::stringstream ss(line);
+		string word;
+		stringstream ss(line);
 
 		// Iterating through every word in the line (ignoring whitespace)...
 		while(ss >> word)
@@ -140,7 +142,7 @@ void pluckFile()
 				word.compare("float") == 0 || 
 				word.compare("double") == 0)
 			{
-				std::cout << word << " -> type\n";
+				cout << word << " -> type\n";
 			}
 			else if (word.compare(",") == 0|| 
 					 word.compare(";") == 0)
@@ -153,27 +155,27 @@ void pluckFile()
 					 word.compare("cout<<") == 0 || 
 					 word.compare("cin>>") == 0)
 			{
-				std::cout << word << " -> reserved word\n";
+				cout << word << " -> reserved word\n";
 			}
 			else if (word.compare("+") == 0 ||
 					 word.compare("-") == 0 ||
 					 word.compare("*") == 0 ||
 					 word.compare("=") == 0)
 			{
-				std::cout << word << " -> operator\n";
+				cout << word << " -> operator\n";
 			}
 			else if (isdigit(word[0]))
 			{
-				std::cout << word << " -> constant\n";
+				cout << word << " -> constant\n";
 			}
 			else if (word.compare("{") == 0 || word.compare("}") == 0 || 
 					 word.compare("(") == 0 || word.compare(")") == 0)
 			{
-				std::cout << word << " -> separator\n";
+				cout << word << " -> separator\n";
 			}
 			else
 			{
-				std::cout << word << " -> identifier\n";
+				cout << word << " -> identifier\n";
 			}
 		}
 	}
@@ -182,11 +184,11 @@ void pluckFile()
 int main()
 {
 	// Our output file here is "newfile.txt".
-	std::fstream fOut;
-	fOut.open("finalp2.txt", std::ios::out);
+	fstream fOut;
+	fOut.open("finalp2.txt", ios::out);
 
 	// Declare queue of strings.
-	std::deque<std::string> q;
+	deque<string> q;
 
 	// Call the function to parse the file.
 	parseFile(q);
