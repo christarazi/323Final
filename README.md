@@ -1,3 +1,3 @@
 # 323Final
 
-Will be seperated into 3 folders.
+Each part will be seperated into folders.
