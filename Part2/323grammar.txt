@@ -1,0 +1,53 @@
+Let P represent <program>
+Let I represent <identifier>
+Let D represent <dec-list>
+Let D’ represent <dec>
+Let T represent <type>
+Let S represent <stat-list>
+Let S’ represent <stat>
+Let P’ represent <print>
+Let A represent <assign>
+Let E represent <expr>
+Let T’ represent <term>
+Let F represent <factor>
+Let N represent <number>
+Let S’’ represent <sign>
+Let D’’ represent <digit>
+Let I’ represent <id>
+
+Then we have the following grammar
+
+P -> program I; var D begin S end.
+
+//Identifiers
+I-> I'U
+U -> I'U|D''U|lambda
+
+D -> D’ : T ;
+D’ -> I , D | I
+T -> integer
+S -> S' | S'S
+S' -> P' | A
+P' -> print( <string>, I ) ;
+A -> I = E ;
+
+//Expressions
+E->T'R
+R->+T'R
+R->-T'R
+R->lambda
+T'->FX
+X->*FX
+X->/FX
+X->lambda
+
+F -> I | N | (E)
+
+
+//Numbers
+N->S''D''U'
+U'->D''U'|lambda
+
+S'' -> + | - | lambda
+D'' -> 0|1|2|3|4|5|6|7|8|9
+I' -> a|b|c|d|e
