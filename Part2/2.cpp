@@ -5,6 +5,7 @@
 #include <string>
 #include <cctype>
 #include <vector>
+#include <stack>
 #include <map>
 #include <algorithm>
 #include <sstream>
@@ -34,12 +35,23 @@ bool isIdentifier(string s)
 // Function to push to stack.
 void pushToStack(string cell, vector<string> & s)
 {
-	// Iterates backwards to push 'cell' in reverse order.
- 	for (int i = cell.size()-1; i >= 0; --i)
+	// Reverse 'cell'.
+	stringstream ss(cell);
+	stack<string> reversedString;
+	string temp;
+	while (ss >> temp)
+	{
+		reversedString.push(temp);
+	}
+	//cout << "Pushing: ";
+ 	while (!reversedString.empty())
  	{
- 		// Using string constructor here because cell[i] is of char type.
- 		s.push_back(string(1, cell[i]));
+ 		string temp = reversedString.top(); reversedString.pop();
+ 		temp.erase(remove(temp.begin(), temp.end(), ' '), temp.end());
+ 		s.push_back(temp);
+ 		cout << temp << " ";
  	}
+ 	cout << "\n";
 }
 
 // Function to show the stack.
@@ -54,33 +66,66 @@ void showStack(vector<string> s)
 }
 
 
-// Function to detect certain mandatory keywords.
-void detectKeywords(vector<string> l)
+// Function to detect certain mandatory keywords. Takes vector by reference.
+void detectKeywords(vector<string> & l)
 {
-	string temp = "";
-	for (auto&& i : l.front())
-	{
-		temp += tolower(i);
-	}
-	// string.find() function searches within the substring.
-	int programKeyword = temp.find("program");
-
-	if (programKeyword == -1)
-	{
-		cout << "program is expected \n";
-	}
-
-	// seems like the find() function searches for an exact match, rather than searching the substring.
+	bool end, begin, program, var;
+	end = begin = program = var = true;
 	
-	//bool programWord = (find(begin(l), end(l), "program") != l.end());	
-	bool beginWord = (find(begin(l), end(l), "begin") != l.end());
-	bool varWord = (find(begin(l), end(l), "var") != l.end());
-	bool endWord = (find(begin(l), end(l), "end.") != l.end());
+	if (find(l.begin(), l.end(), "program") == l.end())
+	{
+		auto programUpper = find(l.begin(), l.begin()+1, "PROGRAM");
+		
+		if (programUpper == l.end()) cout << "program is missing\n";
+		else
+		{
+			int index = l[0].find("PROGRAM", 0);
+			string replaceStr = "program";
+			l[0].replace(index, replaceStr.length(), replaceStr);
+		}
+	}
 
-	//if (!programWord) cout << "program is expected \n";
-	if (!beginWord) cout << "begin is expected \n";
-	if (!varWord) cout << "var is expected \n";
-	if (!endWord) cout << "end. is expected \n";
+	if (find(l.begin(), l.end(), "var") == l.end())
+	{
+		auto varUpper = find(l.begin(), l.end(), "VAR");
+		
+		if (varUpper == l.end()) cout << "var is missing\n";
+		else
+		{
+			int d = distance(l.begin(), varUpper);
+			int index = l[d].find("VAR", 0);
+			string replaceStr = "var";
+			l[d].replace(index, replaceStr.length(), replaceStr);
+		}
+	}
+
+	if (find(l.begin(), l.end(), "begin") == l.end())
+	{
+		auto beginUpper = find(l.begin(), l.end(), "BEGIN");
+		
+		if (beginUpper == l.end()) cout << "begin is missing\n";
+		else
+		{
+			int d = distance(l.begin(), beginUpper);
+			int index = l[d].find("BEGIN", 0);
+			string replaceStr = "begin";
+			l[d].replace(index, replaceStr.length(), replaceStr);
+		}
+	}
+
+	if (find(l.begin(), l.end(), "end.") == l.end())
+	{
+		auto endUpper = find(l.begin(), l.end(), "END.");
+		
+		if (endUpper == l.end()) cout << "end is missing\n";
+		else
+		{
+			int d = distance(l.begin(), endUpper);
+			int index = l[d].find("END.", 0);
+			string replaceStr = "end.";
+			l[d].replace(index, replaceStr.length(), replaceStr);
+		}
+	}
 }
 
 // Function to check the line after the "var" line in text file.
@@ -90,7 +135,7 @@ void ensureVarDeclarations(vector<string> l)
 	for (auto&& i : l)
 	{
 		index++;
-		if (i.compare("var") == 0)
+		if (i.compare("var") == 0 || i.compare("VAR") == 0)
 		{
 			break;
 		}
@@ -145,27 +190,27 @@ void parsingTable(vector<string> l)
 	{
 		{"P",
 		{
-			{"program", "program I; var D begin S end."}
+			{"program", "program I ; var D begin S end."}
 		}},
 
 		{"I",
 		{
-			{"a", "I'U"}, {"b", "I'U"}, {"c", "I'U"}, {"d", "I'U"}, {"e", "I'U"}
+			{"a", "I' U"}, {"b", "I' U"}, {"c", "I' U"}, {"d", "I' U"}, {"e", "I' U"}
 		}},
 
 		{"D",
 		{
-			{"a", "D':T;"}, {"b", "D':T;"}, {"c", "D':T;"}, {"d", "D':T;"}, {"e", "D':T;"}
+			{"a", "D' : T ;"}, {"b", "D' : T ;"}, {"c", "D' :T ;"}, {"d", "D' : T ;"}, {"e", "D' : T ;"}
 		}},
 
 		{"D'",
 		{
-			{"a", "IZ"}, {"b", "IZ"}, {"c", "IZ"}, {"d", "IZ"}, {"e", "IZ"}
+			{"a", "I Z"}, {"b", "I Z"}, {"c", "I Z"}, {"d", "I Z"}, {"e", "I Z"}
 		}},
 
 		{"Z",
 		{
-			{",", ",D"}, {":", "λ"}
+			{",", ", D"}, {":", "λ"}
 		}},
 
 		{"T",
@@ -180,54 +225,54 @@ void parsingTable(vector<string> l)
 
 		{"P'",
 		{
-			{"print", "print( <string> ,I);"}, {":", "λ"}
+			{"print", "print( <string> , I) ;"}, {":", "λ"}
 		}},
 
 		{"A",
 		{
-			{"a", "I=E;"}, {"b", "I=E;"}, {"c", "I=E;"}, {"d", "I=E;"}, {"e", "I=E;"}
+			{"a", "I = E ;"}, {"b", "I = E ;"}, {"c", "I = E ;"}, {"d", "I = E ;"}, {"e", "I = E ;"}
 		}},
 
 		{"E",
 		{
-			{"a", "T'R"}, {"b", "T'R"}, {"c", "T'R"}, {"d", "T'R"}, {"e", "T'R"}, {"+", "T'R"}, {"-", "T'R"}, {"(", "T'R"},
-			{"0", "T'R"}, {"1", "T'R"}, {"2", "T'R"}, {"3", "T'R"}, {"4", "T'R"}, {"5", "T'R"}, {"6", "T'R"}, {"7", "T'R"}, 
-			{"8", "T'R"}, {"9", "T'R"}
+			{"a", "T' R"}, {"b", "T' R"}, {"c", "T' R"}, {"d", "T' R"}, {"e", "T' R"}, {"+", "T' R"}, {"-", "T' R"}, {"(", "T' R"},
+			{"0", "T' R"}, {"1", "T' R"}, {"2", "T' R"}, {"3", "T' R"}, {"4", "T' R"}, {"5", "T' R"}, {"6", "T' R"}, {"7", "T' R"}, 
+			{"8", "T' R"}, {"9", "T' R"}
 		}},
 
 		{"R",
 		{
-			{"+", "+T'R"}, {"-", "+T'R"}, {";", "λ"}, {")", "λ"}, {"e", "I=E;"}
+			{"+", "+ T' R"}, {"-", "+ T' R"}, {";", "λ"}, {")", "λ"}, {"e", "I = E ;"}
 		}},
 
 		{"T'",
 		{
-			{"a", "FX"}, {"b", "FX"}, {"c", "FX"}, {"d", "FX"}, {"e", "FX"}, {"(", "FX"},
-			{"0", "FX"}, {"1", "FX"}, {"2", "FX"}, {"3", "FX"}, {"4", "FX"}, {"5", "FX"}, {"6", "FX"}, {"7", "FX"}, 
-			{"8", "FX"}, {"9", "FX"}
+			{"a", "F X"}, {"b", "F X"}, {"c", "F X"}, {"d", "F X"}, {"e", "F X"}, {"(", "F X"},
+			{"0", "F X"}, {"1", "F X"}, {"2", "F X"}, {"3", "F X"}, {"4", "F X"}, {"5", "F X"}, {"6", "F X"}, {"7", "F X"}, 
+			{"8", "F X"}, {"9", "F X"}
 		}},
 
 		{"X",
 		{
-			{"*", "*FX"}, {"/", "/FX"}, {";", "λ"}, {")", "λ"}, {"e", "I=E;"}
+			{"*", "* F X"}, {"/", "/ F X"}, {";", "λ"}, {")", "λ"}, {"e", "I = E ;"}
 		}},
 
 		{"F",
 		{
-			{"a", "I"}, {"b", "I"}, {"c", "I"}, {"d", "I"}, {"e", "I"}, {"+", "N"}, {"-", "N"}, {"(", "(E)"},
+			{"a", "I"}, {"b", "I"}, {"c", "I"}, {"d", "I"}, {"e", "I"}, {"+", "N"}, {"-", "N"}, {"(", "( E )"},
 			{"0", "N"}, {"1", "N"}, {"2", "N"}, {"3", "N"}, {"4", "N"}, {"5", "N"}, {"6", "N"}, {"7", "N"}, 
 			{"8", "N"}, {"9", "N"}
 		}},
 
 		{"N",
 		{
-			{"+", "S''D''U'"}
+			{"+", "S'' D'' U'"}
 		}},
 
 		{"U'",
 		{
-			{";", "λ"}, {")", "λ"}, {"0", "D''U'"}, {"1", "D''U'"}, {"2", "D''U'"}, {"3", "D''U'"}, {"4", "D''U'"}, {"5", "D''U'"}, {"6", "D''U'"}, 
-			{"7", "D''U'"}, {"8", "D''U'"}, {"9", "D''U'"}
+			{";", "λ"}, {")", "λ"}, {"0", "D'' U'"}, {"1", "D'' U'"}, {"2", "D'' U'"}, {"3", "D'' U'"}, {"4", "D'' U'"}, {"5", "D'' U'"}, {"6", "D'' U'"}, 
+			{"7", "D'' U'"}, {"8", "D'' U'"}, {"9", "D'' U'"}
 		}},
 
 		{"S''",
@@ -243,31 +288,82 @@ void parsingTable(vector<string> l)
 
 		{"U",
 		{
-			{"=", "λ"}, {",", "λ"}, {";", "λ"}, {":", "λ"}, {")", "λ"}
+			{"=", "λ"}, {",", "λ"}, {";", "λ"}, {":", "λ"}, {")", "λ"},
+			{"a", "I' U"}, {"b", "I' U"}, {"c", "I' U"}, {"d", "I' U"}, {"e", "I' U"},
+			{"0", "D'' U"}, {"1", "D'' U"}, {"2", "D'' U"}, {"3", "D'' U"}, {"4", "D'' U"}, {"5", "D'' U"}, {"6", "D'' U"}, {"7", "D'' U"}, 
+			{"8", "D'' U"}, {"9", "D'' U"}
+		}},
+
+		{"I'",
+		{
+			{"a", "a"}, {"b", "b"}, {"c", "c"}, {"d", "d"}, {"e", "e"}
 		}}
 	};
 
 	// Boolean variable to check if word is accepted. Used at the end of the program.
  	bool accepted = true;
- 	
+
+ 	// Initialize the stack with $ then E (starting point of grammar).
+ 	vector<string> s;
+	s.push_back("$");
+	s.push_back("P");
+
+	// Reserved word list; this is needed so we can differentiate between terminals and non-terminals.
+	vector<string> reserved = {"program", "begin", "var", "end.", "integer", "print"};
+
+	stringstream ss;
 	for (auto&& i : l)
 	{
-		vector<string> s;
-		string word = i;
+		ss << i;
+	}
 
-		// Initialize the stack with $ then E (starting point of grammar).
-		s.push_back("$");
-		s.push_back("P");
+	string tmep;
+	while(ss >> tmep)
+	{
+		cout << tmep << "\n";
+	}
+
+	/*
+	for (auto&& i : l)
+	{
+		string word = i;
 
 	 	// 'current' will be holding the current char. in 'word'.
 		string current;
+		string orignalWord;
+		stringstream ss(word);
+		cout << "NEW WORD: " << word << endl;
 		int counter = 0;
+		ss >> current;
+		bool useReserved = false;
 
 		// While the stack is not empty...
 		while(!s.empty())
 		{
+			cout << "\n\n\n";
+			if (find(reserved.begin(), reserved.end(), current) != reserved.end()) 
+			{ 
+				cout << "using useReserved\n"; 
+				useReserved = true;
+			}
+			else 
+			{
+				cout << "using counter\n"; 
+				current = orignalWord[counter]; 
+				useReserved = false;
+				cout << "CURRENT LENGTH = " << current.length() << endl;
+				if (counter >= orignalWord.length())
+				{
+					cout << "IT HAPPENS\n"; 
+					ss >> current; 
+					orignalWord = current; 
+					counter = 0;
+					useReserved = true;
+				}
+			}
+
 			//...set 'current' to a char indexed by 'counter'.
-			current = word[counter];
+			cout << "current: " << current << endl;
 	 
 	 		// If top of stack matches 'current'...
 			if(s.back().compare(current) == 0)
@@ -275,8 +371,12 @@ void parsingTable(vector<string> l)
 				// ...we have found a match...output stack.
 				// Increment counter, pop off the stack and ignore the rest of the iteration.
 				showStack(s);
-				counter++;
+				//counter++;
+				if (useReserved) { ss >> current; orignalWord = current; counter = 0; }
+				else counter++;
 				s.pop_back();
+				cout << "Found a match!\n";
+
 				continue;
 			}
 
@@ -289,6 +389,7 @@ void parsingTable(vector<string> l)
 	 			
 	 			// Get value from 'table' indexed by 'temp' and 'current'.
 	 			string cell = table[temp][current];
+	 			cout << "CELL table[" << temp << "][" << current << "] = " << cell << "\n" ;
 
 	 			// If the value returned from the table is nothing, we can reject the word.
 	 			if (cell.size() == 0)
@@ -319,7 +420,10 @@ void parsingTable(vector<string> l)
 		 				{
 		 					// ...we found a match; show stack and increment counter.
 		 					showStack(s);
-		 					counter++;
+		 					//counter++;
+		 					if (useReserved) { ss >> current; orignalWord = current; counter = 0; }
+		 					else counter++;
+		 					cout << "2 Found a match!\n";
 		 				}
 
 		 				// Get value from 'table' located at 'temp' and 'current'.
@@ -343,6 +447,7 @@ void parsingTable(vector<string> l)
 			}
 		}
 	}
+	*/
 
 	// If 'accepted' is true, word is accepted.
 	if (accepted) cout << "Word accepted." << endl;

@@ -15,7 +15,7 @@ void parseFile(deque<string> &q)
 	fstream fIn, fOut;
 	string line;
 
-	// Our input file is "p1.txt".
+	// Our input file is "finalp1.txt".
 	fIn.open("finalp1.txt", ios::in);
 
 	while (getline(fIn, line))
@@ -56,8 +56,7 @@ void parseFile(deque<string> &q)
 		{
 			// If the current character is...
 			if (line[i] == ',' || line[i] == '+' || line[i] == '-' ||
-				line[i] == '=' || line[i] == '*' || line[i] == '/' ||
-				line[i] == '(' || line[i] == ')')
+				line[i] == '=' || line[i] == '*' || line[i] == '/')
 			{
 				// and if both previous and next character are not spaces...
 				if (line[i-1] != ' ' && line[i+1] != ' ')
@@ -183,7 +182,7 @@ void pluckFile()
 	
 int main()
 {
-	// Our output file here is "newfile.txt".
+	// Our output file here is "finalp2.txt".
 	fstream fOut;
 	fOut.open("finalp2.txt", ios::out);
 

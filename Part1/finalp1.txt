@@ -1,4 +1,4 @@
-program a2015;
+PROGRAM a2015;
 
 (* This program computes and prints the value
 			of an expression *)
@@ -7,7 +7,7 @@ var
 (* declare variables *)
 
 	a1 ,          ba ,            c, ba12   : integer   ;
-begin
+BEGIN
 
 		a1            = 3;
 		ba =         4 ;

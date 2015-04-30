@@ -1,12 +1,12 @@
-program a2015 ;
-var
+PROGRAM a2015 ;
+VAR
 a1 , ba , c , ba12 : integer ;
-begin
+BEGIN
 a1 = 3 ;
 ba = 4 ;
 c = 5 ;
-print ( 'a1 = ' , a1 ) ;
-print ( ' value of c = ' , c ) ;
-ba12 = a1 * ( ba + 2 * c ) ;
-print ( 'ba12 is equal to ' , ba12 ) ;
-end.
+print( 'a1 = ' , a1 ) ;
+print( ' value of c = ' , c) ;
+ba12 = a1 * ( ba + 2 * c) ;
+print( 'ba12 is equal to ' , ba12 ) ;
+END.
