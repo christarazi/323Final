@@ -25,7 +25,7 @@ U -> I'U | D'' U | lambda
 
 D -> D’ : T ;
 D’ -> I Z | I
-Z -> , D | lambda
+Z -> , D' | lambda
 T -> integer
 S -> S' | S'S
 S' -> P' | A
