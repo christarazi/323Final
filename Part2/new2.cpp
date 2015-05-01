@@ -297,6 +297,11 @@ void parsingTable(deque<string> inputQueue)
 		{"I'",
 		{
 			{"a", "a"}, {"b", "b"}, {"c", "c"}, {"d", "d"}, {"e", "e"}
+		}},
+
+		{"S",
+		{
+			{"print", "S'"}, {"a", "S'"}, {"b", "S'"}, {"c", "S'"}, {"d", "S'"}, {"e", "S'"}
 		}}
 	};
 
