@@ -266,7 +266,8 @@ void parsingTable(deque<string> inputQueue)
 
 		{"N",
 		{
-			{"+", "S'' D'' U'"}
+			{"+", "S'' D'' U'"}, {"-", "S'' D'' U'"}, {"0", "D'' U'"}, {"1", "D'' U'"}, {"2", "D'' U'"}, {"3", "D'' U'"}, {"4", "D'' U'"}, {"5", "D'' U'"}, {"6", "D'' U'"}, {"7", "D'' U'"}, 
+			{"8", "D'' U'"}, {"9", "D'' U'"}
 		}},
 
 		{"U'",
@@ -301,7 +302,7 @@ void parsingTable(deque<string> inputQueue)
 
 		{"S",
 		{
-			{"print", "S'"}, {"a", "S'"}, {"b", "S'"}, {"c", "S'"}, {"d", "S'"}, {"e", "S'"}
+			{"print", "S' S"}, {"a", "S' S"}, {"b", "S' S"}, {"c", "S' S"}, {"d", "S' S"}, {"e", "S' S"}
 		}}
 	};
 
