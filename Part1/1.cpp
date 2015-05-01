@@ -25,7 +25,7 @@ void parseFile(deque<string> &q)
 		regex leadingSpace("^(\\s+)");			// Looks for one or more leading spaces.
 		regex semiColonNewLine("(\\s*;\\s*)");	// Looks for ';' surrounded by zero or more spaces.
 		regex comments("(((\\(\\*.*\\*\\))|(\\(\\*.*))|(.*\\*\\)))");	// Looks for comments.
-		regex reservedWords("((var)|(begin))");	// Looks for reserved words.
+		regex reservedWords("((var)|(begin)|(BEGIN)|(VAR))");	// Looks for reserved words.
 		regex endWord("(end\\.)");	// Looks for "end.".
 
 		// Process line with regex.
@@ -56,7 +56,8 @@ void parseFile(deque<string> &q)
 		{
 			// If the current character is...
 			if (line[i] == ',' || line[i] == '+' || line[i] == '-' ||
-				line[i] == '=' || line[i] == '*' || line[i] == '/')
+				line[i] == '=' || line[i] == '*' || line[i] == '/' ||
+				line[i] == '(' || line[i] == ')')
 			{
 				// and if both previous and next character are not spaces...
 				if (line[i-1] != ' ' && line[i+1] != ' ')
