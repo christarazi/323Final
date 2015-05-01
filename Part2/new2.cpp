@@ -210,7 +210,7 @@ void parsingTable(deque<string> inputQueue)
 
 		{"Z",
 		{
-			{",", ", D"}, {":", "λ"}
+			{",", ", D'"}, {":", "λ"}
 		}},
 
 		{"T",
