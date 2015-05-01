@@ -303,10 +303,13 @@ void parsingTable(deque<string> inputQueue)
 	// Boolean variable to check if word is accepted. Used at the end of the program.
  	bool accepted = true;
 
- 	// Initialize the stack with $ then E (starting point of grammar).
+ 	// Initialize the stack with $ then P (starting point of grammar).
  	vector<string> stateStack;
 	stateStack.push_back("$");
 	stateStack.push_back("P");
+	// current holds the current token from the input.
+	// topOfStack holds the token from the stateStack.
+	// cell holds the data which we retrieve from the table.
 	string current; string topOfStack; string cell;
 
 	current = inputQueue.front();
