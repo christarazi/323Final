@@ -290,8 +290,8 @@ void parsingTable(vector<string> l)
 		{
 			{"=", "λ"}, {",", "λ"}, {";", "λ"}, {":", "λ"}, {")", "λ"},
 			{"a", "I' U"}, {"b", "I' U"}, {"c", "I' U"}, {"d", "I' U"}, {"e", "I' U"},
-			{"0", "D'' U"}, {"1", "D'' U"}, {"2", "D'' U"}, {"3", "D'' U"}, {"4", "D'' U"}, {"5", "D'' U"}, {"6", "D'' U"}, {"7", "D'' U"}, 
-			{"8", "D'' U"}, {"9", "D'' U"}
+			{"0", "U' U"}, {"1", "U' U"}, {"2", "U' U"}, {"3", "U' U"}, {"4", "U' U"}, {"5", "U' U"}, {"6", "U' U"}, {"7", "U' U"}, 
+			{"8", "U' U"}, {"9", "U' U"}
 		}},
 
 		{"I'",
@@ -311,6 +311,7 @@ void parsingTable(vector<string> l)
 	// Reserved word list; this is needed so we can differentiate between terminals and non-terminals.
 	vector<string> reserved = {"program", "begin", "var", "end.", "integer", "print"};
 
+	/*
 	stringstream ss;
 	for (auto&& i : l)
 	{
@@ -322,8 +323,9 @@ void parsingTable(vector<string> l)
 	{
 		cout << tmep << "\n";
 	}
+	*/
 
-	/*
+	
 	for (auto&& i : l)
 	{
 		string word = i;
@@ -335,10 +337,12 @@ void parsingTable(vector<string> l)
 		cout << "NEW WORD: " << word << endl;
 		int counter = 0;
 		ss >> current;
+		orignalWord = current;
 		bool useReserved = false;
+		bool goToNewLine = false;
 
 		// While the stack is not empty...
-		while(!s.empty())
+		while(!goToNewLine)
 		{
 			cout << "\n\n\n";
 			if (find(reserved.begin(), reserved.end(), current) != reserved.end()) 
@@ -364,6 +368,7 @@ void parsingTable(vector<string> l)
 
 			//...set 'current' to a char indexed by 'counter'.
 			cout << "current: " << current << endl;
+			cout << "counter: " << counter << endl;
 	 
 	 		// If top of stack matches 'current'...
 			if(s.back().compare(current) == 0)
@@ -376,8 +381,13 @@ void parsingTable(vector<string> l)
 				else counter++;
 				s.pop_back();
 				cout << "Found a match!\n";
-
-				continue;
+				
+				if (current.compare("begin") == 0 || current.compare("var") == 0 || current.compare("end.") == 0) 
+				{
+					goToNewLine = true;
+					break;
+				}
+				else continue;
 			}
 
 			// If top of stack does not match 'current'...
@@ -424,6 +434,8 @@ void parsingTable(vector<string> l)
 		 					if (useReserved) { ss >> current; orignalWord = current; counter = 0; }
 		 					else counter++;
 		 					cout << "2 Found a match!\n";
+							goToNewLine = true;
+							break;
 		 				}
 
 		 				// Get value from 'table' located at 'temp' and 'current'.
@@ -445,9 +457,10 @@ void parsingTable(vector<string> l)
 	 				pushToStack(cell, s);
 	 			}
 			}
+			
 		}
 	}
-	*/
+	
 
 	// If 'accepted' is true, word is accepted.
 	if (accepted) cout << "Word accepted." << endl;
