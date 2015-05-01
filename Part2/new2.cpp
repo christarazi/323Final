@@ -225,7 +225,7 @@ void parsingTable(deque<string> inputQueue)
 
 		{"P'",
 		{
-			{"print", "print( <string> , I) ;"}, {":", "λ"}
+			{"print", "print ( <string> , I ) ;"}, {":", "λ"}
 		}},
 
 		{"A",
@@ -254,7 +254,7 @@ void parsingTable(deque<string> inputQueue)
 
 		{"X",
 		{
-			{"*", "* F X"}, {"/", "/ F X"}, {";", "λ"}, {")", "λ"}, {"e", "I = E ;"}
+			{"*", "* F X"}, {"/", "/ F X"}, {";", "λ"}, {")", "λ"}, {"+", "λ"}, {"-", "λ"}
 		}},
 
 		{"F",
@@ -272,7 +272,8 @@ void parsingTable(deque<string> inputQueue)
 
 		{"U'",
 		{
-			{";", "λ"}, {")", "λ"}, {"0", "D'' U'"}, {"1", "D'' U'"}, {"2", "D'' U'"}, {"3", "D'' U'"}, {"4", "D'' U'"}, {"5", "D'' U'"}, {"6", "D'' U'"}, 
+			{";", "λ"}, {")", "λ"}, {"+", "λ"}, {"-", "λ"}, {"*", "λ"}, {"/", "λ"}, {",", "λ"}, {":", "λ"}, {"=", "λ"}, 
+			{"0", "D'' U'"}, {"1", "D'' U'"}, {"2", "D'' U'"}, {"3", "D'' U'"}, {"4", "D'' U'"}, {"5", "D'' U'"}, {"6", "D'' U'"}, 
 			{"7", "D'' U'"}, {"8", "D'' U'"}, {"9", "D'' U'"}
 		}},
 
@@ -289,7 +290,7 @@ void parsingTable(deque<string> inputQueue)
 
 		{"U",
 		{
-			{"=", "λ"}, {",", "λ"}, {";", "λ"}, {":", "λ"}, {")", "λ"},
+			{"=", "λ"}, {",", "λ"}, {";", "λ"}, {":", "λ"}, {")", "λ"}, {"/", "λ"}, {"*", "λ"}, {"+", "λ"}, {"-", "λ"},
 			{"a", "I' U"}, {"b", "I' U"}, {"c", "I' U"}, {"d", "I' U"}, {"e", "I' U"},
 			{"0", "D'' U"}, {"1", "D'' U"}, {"2", "D'' U"}, {"3", "D'' U"}, {"4", "D'' U"}, {"5", "D'' U"}, {"6", "D'' U"}, {"7", "D'' U"}, 
 			{"8", "D'' U"}, {"9", "D'' U"}
@@ -302,7 +303,7 @@ void parsingTable(deque<string> inputQueue)
 
 		{"S",
 		{
-			{"print", "S' S"}, {"a", "S' S"}, {"b", "S' S"}, {"c", "S' S"}, {"d", "S' S"}, {"e", "S' S"}
+			{"print", "S' S"}, {"a", "S' S"}, {"b", "S' S"}, {"c", "S' S"}, {"d", "S' S"}, {"e", "S' S"}, {"end.", "λ"}
 		}}
 	};
 
@@ -318,23 +319,46 @@ void parsingTable(deque<string> inputQueue)
 	// cell holds the data which we retrieve from the table.
 	string current; string topOfStack; string cell;
 
+	string firstSingleQuote = "'";
+	string secondSingleQuote = "'";
+
 	current = inputQueue.front();
 	inputQueue.pop_front();
 
+	top:
 	while(inputQueue.size() != 0)
 	{
+		// Handles quotes inside the print statement.
+		if (current.compare(firstSingleQuote) == 0)
+		{
+			cout << "current is " + current << endl;
+			current = inputQueue.front();
+			inputQueue.pop_front();
+			while (current.compare(firstSingleQuote) != 0)
+			{
+				cout << "current is " + current << endl;
+				current = inputQueue.front();
+				inputQueue.pop_front();
+			}
+			current = inputQueue.front();
+			inputQueue.pop_front();
+		}
+
 		topOfStack = stateStack.back();
 		stateStack.pop_back();
+		if (topOfStack.compare("<string>") == 0) continue;
 
 		while (current.compare(topOfStack) == 0)
 		{
 			match:
-			cout << "Matched! - " << current << " " << topOfStack << endl;
+			cout << "Matched first! - " << current << " " << topOfStack << endl;
 			current = inputQueue.front();
 			inputQueue.pop_front();
 
 			topOfStack = stateStack.back();
 			stateStack.pop_back();
+			if (topOfStack.compare("<string>") == 0) goto end;
+			if (current.compare("$") == 0 && topOfStack.compare("$") == 0) goto accepted;
 		}
 		
 		cell = table[topOfStack][current];
@@ -342,7 +366,7 @@ void parsingTable(deque<string> inputQueue)
 
 		if (cell.length() == 0)
 		{
-			cout << "ERROR" << endl;
+			cout << "ERROR" << endl; accepted = false;
 			break;
 		}
 		else if (cell.compare("λ") == 0)
@@ -352,6 +376,7 @@ void parsingTable(deque<string> inputQueue)
 				cout << "We found lamda!" << endl;
 				topOfStack = stateStack.back();
 				stateStack.pop_back();
+				if (topOfStack.compare("<string>") == 0) goto end;
 				cell = table[topOfStack][current];
 				cout << "Getting - table[" << topOfStack + "][" + current + "] = " + cell << endl;
 				if (cell.compare("λ") != 0 && cell.length() != 0) 
@@ -371,11 +396,18 @@ void parsingTable(deque<string> inputQueue)
 			pushToStack(cell, stateStack);
 			showStack(stateStack);
 		}
+		end:
+		cout << "Restarting!" << endl;
+		goto top;
+
+		accepted:
+		cout << "Accepted!" << endl;
+		accepted = true; break;
 	}
 
-	// If 'accepted' is true, word is accepted.
-	if (accepted) cout << "Word accepted." << endl;
-	else 		  cout << "Word denied." << endl;
+	// If 'accepted' is true, program is accepted.
+	if (accepted) cout << "Program accepted." << endl;
+	else 		  cout << "Program denied." << endl;
 }
 
 int main()
@@ -416,6 +448,14 @@ int main()
 			}
 		}
 	}
+	queue.push_back("$");
+
+
+	/*
+	for (auto&& k : queue)
+	{
+		cout << k << endl;
+	}*/
 
 	
 	parsingTable(queue);
