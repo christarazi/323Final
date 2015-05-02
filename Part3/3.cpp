@@ -27,10 +27,8 @@ void parseStatements(deque<string> lines, deque<string> & outputLines)
 	    	parsePrint.push_back(i);
 	    	for (auto&& k : parsePrint)
 	    	{
-	    		int singleQuoteCounter = 0;
 	    	    for (auto&& ch : k)
 	    	    {
-
 	    	        if (ch == '\'') build += "\""; singleQuoteCounter++;
 	    	        if (isalnum(ch) || ispunct(ch) && ch != ',' && ch != '(' && ch != ')' && ch != '\'')
 	    	        	build += ch;
