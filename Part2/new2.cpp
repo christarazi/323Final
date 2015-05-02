@@ -8,6 +8,7 @@
 #include <stack>
 #include <map>
 #include <algorithm>
+#include <iterator>
 #include <sstream>
 
 using namespace std;
@@ -16,7 +17,7 @@ using namespace std;
 bool isIdentifier(string s)
 {
 	if (s.compare("integer") == 0 || s.compare("begin") == 0 ||
-		s.compare("end") == 0 || s.compare("var") == 0)
+		s.compare("end") == 0 || s.compare("var") == 0 || s.compare("print") == 0)
 	{
 		return false;
 	}
@@ -65,83 +66,113 @@ void showStack(vector<string> s)
 	cout << endl;
 }
 
-
 // Function to detect certain mandatory keywords. Takes vector by reference.
-void detectKeywords(vector<string> & l)
+void detectKeywords(vector<string> & lines)
 {
-	bool end, begin, program, var;
-	end = begin = program = var = true;
-	
-	if (find(l.begin(), l.end(), "program") == l.end())
+	// Checking for program keyword.
+	if (find(lines.begin(), lines.begin()+1, "program") == lines.end())
 	{
-		auto programUpper = find(l.begin(), l.begin()+1, "PROGRAM");
+		auto programUpper = find(lines.begin(), lines.begin()+1, "PROGRAM");
 		
-		if (programUpper == l.end()) cout << "program is missing\n";
+		cout << (programUpper == lines.begin()+1) << endl;
+		if (programUpper == lines.end()) cout << "program is missing\n";
 		else
 		{
-			int index = l[0].find("PROGRAM", 0);
+			int index = lines[0].find("PROGRAM", 0);
 			string replaceStr = "program";
-			l[0].replace(index, replaceStr.length(), replaceStr);
+			cout << index + " " << replaceStr << "    " + replaceStr.length() <<  endl;
+			lines[0].replace(index, replaceStr.length(), replaceStr);
 		}
 	}
 
-	if (find(l.begin(), l.end(), "var") == l.end())
+	// Checking for var keyword.
+	if (find(lines.begin(), lines.end(), "var") == lines.end())
 	{
-		auto varUpper = find(l.begin(), l.end(), "VAR");
+		auto varUpper = find(lines.begin(), lines.end(), "VAR");
 		
-		if (varUpper == l.end()) cout << "var is missing\n";
+		if (varUpper == lines.end()) cout << "var is missing\n";
 		else
 		{
-			int d = distance(l.begin(), varUpper);
-			int index = l[d].find("VAR", 0);
+			int d = distance(lines.begin(), varUpper);
+			int index = lines[d].find("VAR", 0);
 			string replaceStr = "var";
-			l[d].replace(index, replaceStr.length(), replaceStr);
+			lines[d].replace(index, replaceStr.length(), replaceStr);
 		}
 	}
 
-	if (find(l.begin(), l.end(), "begin") == l.end())
+	// Checking for begin keyword.
+	if (find(lines.begin(), lines.end(), "begin") == lines.end())
 	{
-		auto beginUpper = find(l.begin(), l.end(), "BEGIN");
+		auto beginUpper = find(lines.begin(), lines.end(), "BEGIN");
 		
-		if (beginUpper == l.end()) cout << "begin is missing\n";
+		if (beginUpper == lines.end()) cout << "begin is missing\n";
 		else
 		{
-			int d = distance(l.begin(), beginUpper);
-			int index = l[d].find("BEGIN", 0);
+			int d = distance(lines.begin(), beginUpper);
+			int index = lines[d].find("BEGIN", 0);
 			string replaceStr = "begin";
-			l[d].replace(index, replaceStr.length(), replaceStr);
+			lines[d].replace(index, replaceStr.length(), replaceStr);
 		}
 	}
 
-	if (find(l.begin(), l.end(), "end.") == l.end())
+	// Checking for end. keyword.
+	if (find(lines.begin(), lines.end(), "end.") == lines.end())
 	{
-		auto endUpper = find(l.begin(), l.end(), "END.");
+		auto endUpper = find(lines.begin(), lines.end(), "END.");
 		
-		if (endUpper == l.end()) cout << "end is missing\n";
+		if (endUpper == lines.end()) cout << "end is missing\n"; 
 		else
 		{
-			int d = distance(l.begin(), endUpper);
-			int index = l[d].find("END.", 0);
+			int d = distance(lines.begin(), endUpper);
+			int index = lines[d].find("END.", 0);
 			string replaceStr = "end.";
-			l[d].replace(index, replaceStr.length(), replaceStr);
+			lines[d].replace(index, replaceStr.length(), replaceStr);
 		}
+	}
+
+	// Checking for integer keyword.
+	bool integer = false;
+	for(auto&& j : lines)
+	{
+		if (j.find("integer") != -1)
+		{
+			integer = true; break;
+		}
+	}
+	if (!integer) cout << "integer is missing\n"; 
+
+	// Checking for parenthesis after print statement.
+	int i = 0;
+	int occurances = 0;
+	bool leftParansMissing;
+	bool rightParansMissing;
+	for(auto&& j : lines)
+	{
+		if (j.find("print") != -1)
+		{
+			leftParansMissing = lines[i].find("(") == -1;
+			rightParansMissing = lines[i].find(")") == -1;
+			if (leftParansMissing || rightParansMissing) occurances++;
+		}
+		i++;
+	}
+	for (int i = 0; i < occurances; ++i)
+	{
+		if (leftParansMissing) cout << "( is missing" << endl;
+		if (rightParansMissing) cout << ") is missing" << endl;
 	}
 }
 
 // Function to check the line after the "var" line in text file.
-void ensureVarDeclarations(vector<string> l)
+vector<string> ensureVarDeclarations(vector<string> lines)
 {
 	int index = 0;
-	for (auto&& i : l)
+	for (auto&& i : lines)
 	{
-		index++;
-		if (i.compare("var") == 0 || i.compare("VAR") == 0)
-		{
-			break;
-		}
+		if (i.find("integer") != -1) break;
+		else index++;
 	}
-
-	string temp = l[index];
+	string temp = lines[index];
 	int integerKeyword = temp.find("integer");
 
 	stringstream ss(temp);	// tokenize temp string
@@ -149,6 +180,7 @@ void ensureVarDeclarations(vector<string> l)
 	vector<string> v;
 	while(ss >> token) v.push_back(token);	// insert each token in a vector
 
+	vector<string> variables;
 	if (integerKeyword != -1)
 	{
 		int IDs = 0;
@@ -156,18 +188,9 @@ void ensureVarDeclarations(vector<string> l)
 		int colons = 0;
 		for (int i = 0; i < v.size(); i++)
 		{
-			if (isIdentifier(v[i]))
-			{
-				IDs++;
-			}
-			else if (v[i] == ",")
-			{
-				commas++;
-			}
-			else if (v[i] == ":")
-			{
-				colons++;
-			}
+			if (isIdentifier(v[i])) { IDs++; variables.push_back(v[i]); } 
+			else if (v[i] == ",") commas++;
+			else if (v[i] == ":") colons++;
 		}
 
 		if (IDs - commas > 1) cout << "more than one comma is missing\n";
@@ -175,11 +198,57 @@ void ensureVarDeclarations(vector<string> l)
 
 		if (colons != 1) cout << "colon is missing\n";
 
-		if (v[v.size()-1] != ";")
+		if (v[v.size()-1] != ";") cout << "semicolon is missing\n";
+	}
+	
+	// Sort and get only unique variables.
+	sort(variables.begin(), variables.end());
+	auto last = unique(variables.begin(), variables.end());
+	variables.erase(last, variables.end());
+
+	return variables;
+}
+
+vector<string> findVariablesUsed(vector<string> lines)
+{
+	vector<string> variables;
+	for (auto&& i : lines)
+	{
+		if (i.find("=") != -1 || i.find("print") != -1) 
 		{
-			cout << "semicolon is missing\n";
+			stringstream ss(i);
+			string temp;
+			while (ss >> temp)
+			{
+				// Handles quotes inside the print statement.
+				if (temp.find("'") != -1)
+				{
+					ss >> temp;
+					while (temp.find("'") == -1) ss >> temp;
+					ss >> temp;
+				}
+				if (isIdentifier(temp)) variables.push_back(temp);
+			}
 		}
-	}	
+	}
+
+	// Sort and get only unique variables.
+	sort(variables.begin(), variables.end());
+	auto last = unique(variables.begin(), variables.end());
+	variables.erase(last, variables.end());
+
+	return variables;
+}
+
+void checkVariables(vector<string> variables, vector<string> usedVars)
+{
+	vector<string> differences;
+
+	// Examines usedVars vector; if usedVars has anything that variables does not, insert in differences.
+	set_difference(usedVars.begin(), usedVars.end(), variables.begin(), variables.end(), 
+		inserter(differences, differences.begin()));
+
+	for (auto&& i : differences) cout << "unidentified variable " + i << endl;
 }
 
 void parsingTable(deque<string> inputQueue)
@@ -331,12 +400,10 @@ void parsingTable(deque<string> inputQueue)
 		// Handles quotes inside the print statement.
 		if (current.compare(firstSingleQuote) == 0)
 		{
-			cout << "current is " + current << endl;
 			current = inputQueue.front();
 			inputQueue.pop_front();
 			while (current.compare(firstSingleQuote) != 0)
 			{
-				cout << "current is " + current << endl;
 				current = inputQueue.front();
 				inputQueue.pop_front();
 			}
@@ -413,23 +480,28 @@ void parsingTable(deque<string> inputQueue)
 int main()
 {
 	deque<string> queue;
-	vector<string> l;
+	vector<string> lines;
 	fstream fIn("finalp2.txt", ios::in);
 	string line;
 
 	// Reserved word list; this is needed so we can differentiate between terminals and non-terminals.
 	vector<string> reserved = {"program", "begin", "var", "end.", "integer", "print"};
+	vector<string> variables;
+	vector<string> variablesUsed;
 
 	while(getline(fIn, line))
 	{
-		l.push_back(line);		// For other parts of program.
+		lines.push_back(line);		// Get every line in the text file and insert the whole line as a string.
 	}
 	fIn.close();
 
-	detectKeywords(l);
-	ensureVarDeclarations(l);
+	detectKeywords(lines);
+	variables = ensureVarDeclarations(lines);
+	variablesUsed = findVariablesUsed(lines);
+	checkVariables(variables, variablesUsed);
 
-	for(auto&& i : l)
+	// Insert reserved words whole and non-reserved words character by character. 
+	for(auto&& i : lines)
 	{
 		stringstream ss(i);
 		string temp;
@@ -450,16 +522,7 @@ int main()
 	}
 	queue.push_back("$");
 
-
-	/*
-	for (auto&& k : queue)
-	{
-		cout << k << endl;
-	}*/
-
-	
 	parsingTable(queue);
-	
 
 	return 0;
 }
