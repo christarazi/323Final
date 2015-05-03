@@ -29,7 +29,7 @@ void parseStatements(deque<string> lines, deque<string> & outputLines)
 	    	{
 	    	    for (auto&& ch : k)
 	    	    {
-	    	        if (ch == '\'') build += "\""; singleQuoteCounter++;
+	    	        if (ch == '\'') build += "\"";
 	    	        if (isalnum(ch) || ispunct(ch) && ch != ',' && ch != '(' && ch != ')' && ch != '\'')
 	    	        	build += ch;
 	    	        if (ch == ',') build += "<<";
