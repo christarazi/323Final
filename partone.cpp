@@ -41,7 +41,7 @@ void parseFile(deque<string> & q)
 		regex semiColonNewLine("(\\s*;\\s*)");	// Looks for ';' surrounded by zero or more spaces.
 		regex comments("(((\\(\\*.*\\*\\))|(\\(\\*.*))|(.*\\*\\)))");	// Looks for comments.
 		regex reservedWords("((var)|(begin)|(BEGIN)|(VAR))");	// Looks for reserved words.
-		regex endWord("(end\\.)");	// Looks for "end.".
+		regex endWord("(end\\.)|(END\\.)");	// Looks for "end.".
 
         // Replaces 'line' with single whitespace.
 		line = regex_replace(line, whitespace, " ");			

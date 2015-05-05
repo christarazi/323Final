@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+#include <regex>
 #include "partone.h"
 #include "partthree.h"
 
@@ -169,6 +170,22 @@ bool detectKeywords(vector<string> & lines)
 		if (rightParansMissing) { cout << ") is missing" << endl; keywordsIntact = false; }
 	}
 
+	// Check for the existence and spelling of the print statements.
+	regex findPrintStatement("^(\\w*)[ ]?\\(([ ]?[']?[ ]?.+?[ ]?[']?)\\)");
+	smatch match;
+	vector<string> printLineStatements;
+	for (auto&& i : lines)
+	{
+		// Puts all print statements into a separate vector.
+	    regex_search(i, match, findPrintStatement);
+	    if (match[0].length() != 0) printLineStatements.push_back(i);
+	}
+	for (auto&& i : printLineStatements)
+	{
+	    regex_search(i, match, findPrintStatement);
+	    if (match[1].length() == 0) { cout << "print is missing" << endl; keywordsIntact = false; }
+	    else if (match[1].compare("print") != 0) { cout << "print is misspelled" << endl; keywordsIntact = false; }
+	}
 	return keywordsIntact;
 }
 
