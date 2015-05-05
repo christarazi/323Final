@@ -1,0 +1,47 @@
+First:
+
+	I' = {abcde}
+	D'' = {0123456789}
+	S'' = {+-λ}
+	F = {( abcde +- 0123456789}
+	X = {*/λ}
+	T' = {( abcde +- 0123456789}
+	R = {+-λ}
+	E = {( abcde +- 0123456789}
+	A = {abcde}
+	P' = {print}
+	S' = {print abcde}
+	S = {print abcde}
+	T = {integer}
+	D' = {abcde}
+	D = {abcde}
+	I = {abcde}
+	U = {abcde 0123456789 λ}
+	N = {+- 0123456789}
+	U' = {0123456789 λ}
+	P = {program}
+	Z = {,}
+
+
+Follow:
+
+	P = {$}
+	I = {),=;:}
+	U = {),=;: *+-/}
+	D = {begin}
+	D' = {:}
+	T = {;}
+	S = {end.}
+	S' = {end. print abcde}
+	P' = {end. print abcde}
+	A = {end. print abcde}
+	E = {;)}
+	R = {;)}
+	T' = {;) +-}
+	R = {;)}
+	F = {;) */ +-}
+	X = {;) +-}
+	U' = {;) *+-/}
+	D'' = {;) 123456789 ,=: abcde}
+	I' = {;) abcde 0123456789}
+	Z = {:}
