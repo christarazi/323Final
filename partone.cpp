@@ -13,13 +13,14 @@ using namespace std;
 void initiateParsing()
 {
 	deque<string> q;
+	deque<string> finalQ;
 	fstream fOut;
 	fOut.open("finalp2.txt", ios::out);
 
 	parseFile(q);
 
 	// Iterate through queue to write to output file.
-	for (auto&&i : q) fOut << i;
+	for (auto&& i : q) if (i != "\n") fOut << i;
 	fOut.close();
 }
 
@@ -38,10 +39,11 @@ void parseFile(deque<string> & q)
 		// Declare regex patterns.
 		regex whitespace("[\\s]+");			// Looks for one or more whitespace chars.
 		regex leadingSpace("^(\\s+)");			// Looks for one or more leading spaces.
-		regex semiColonNewLine("(\\s*;\\s*)");	// Looks for ';' surrounded by zero or more spaces.
+		regex semiColonNewLine("([ \t]?;[ \t]?)");	// Looks for ';' surrounded by zero or more spaces.
 		regex comments("(((\\(\\*.*\\*\\))|(\\(\\*.*))|(.*\\*\\)))");	// Looks for comments.
 		regex reservedWords("((var)|(begin)|(BEGIN)|(VAR))");	// Looks for reserved words.
 		regex endWord("(end\\.)|(END\\.)");	// Looks for "end.".
+		regex everyLine("^(?!var|VAR|BEGIN|begin).*?$");	// Matches every line except ones that start with reserved words.
 
         // Replaces 'line' with single whitespace.
 		line = regex_replace(line, whitespace, " ");			
@@ -55,6 +57,8 @@ void parseFile(deque<string> & q)
 		line = regex_replace(line, comments, "");
 		// Replaces 'line' with the itself plus newline.
 		line = regex_replace(line, reservedWords, line+"\n");
+		// Replaces 'line' with the itself plus newline. Makes sure every line (even w/o ';') has its own line.
+		line = regex_replace(line, everyLine, line+"\n");
 
 		// Check if the lines starts with a comment, if so, proceed; does not get pushed to queue.
 		if (line[0] == '(' && line[1] == '*')
