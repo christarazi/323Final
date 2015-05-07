@@ -140,24 +140,19 @@ bool detectKeywords(vector<string> & lines)
 
 	// Checking for parenthesis after print statement.
 	int i = 0;
-	int occurances = 0;
-	bool leftParansMissing;
-	bool rightParansMissing;
+	vector<bool> leftParansMissing;
+	vector<bool> rightParansMissing;
 	for(auto&& j : lines)
 	{
 		if (j.find("print") != -1)
 		{
-			leftParansMissing = lines[i].find("(") == -1;
-			rightParansMissing = lines[i].find(")") == -1;
-			if (leftParansMissing || rightParansMissing) occurances++;
+			leftParansMissing.push_back(lines[i].find("(") == -1);
+			rightParansMissing.push_back(lines[i].find(")") == -1);
 		}
 		i++;
 	}
-	for (int i = 0; i < occurances; ++i)
-	{
-		if (leftParansMissing) { cout << "( is missing" << endl; keywordsIntact = false; }
-		if (rightParansMissing) { cout << ") is missing" << endl; keywordsIntact = false; }
-	}
+	for (auto&& elem : leftParansMissing) if (elem) { cout << "( is missing" << endl; keywordsIntact = false; }
+	for (auto&& elem : rightParansMissing) if (elem) { cout << ") is missing" << endl; keywordsIntact = false; }
 
 	// Check for the existence and spelling of the print statements.
 	regex findPrintStatement("^(\\w*)[ ]?\\(([ ]?[']?[ ]?.+?[ ]?[']?)\\)");
