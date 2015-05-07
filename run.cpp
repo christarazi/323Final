@@ -190,8 +190,9 @@ bool detectKeywords(vector<string> & lines)
 }
 
 // Function to check the line after the "var" line in text file.
-vector<string> ensureVarDeclarations(vector<string> lines)
+vector<string> ensureVarDeclarations(vector<string> lines, bool & intact)
 {
+	/*
 	int index = 0;
 	for (auto&& i : lines)
 	{
@@ -233,6 +234,95 @@ vector<string> ensureVarDeclarations(vector<string> lines)
 	variables.erase(last, variables.end());
 
 	return variables;
+	*/
+
+	vector<string> variables;
+	vector<string> totalLines;
+	vector<string> lineToProcess;
+	for (auto&& i : lines) if (i.find("integer") != -1) totalLines.push_back(i);
+	for (auto&& i : totalLines)
+	{
+		stringstream ss(i);
+		string temp;
+	    while (ss >> temp) 
+	    {
+	    	lineToProcess.push_back(temp);						// Pushes each token.
+	    	if (isIdentifier(temp)) variables.push_back(temp);	// Pushes variables for later use.
+	    }
+
+	    // Handling the var declarations line here.
+	    for (int index = 0; index < lineToProcess.size();)
+	    {
+	        if (isIdentifier(lineToProcess[index]) && lineToProcess[index+1] == ",") index += 2;
+	        else if (isIdentifier(lineToProcess[index]) && lineToProcess[index+1] != ","
+	        	&& lineToProcess[index+2].compare("integer") != 0) 
+	        {
+	        	cout << "comma is missing" << endl;
+	        	index++;
+	        	intact = false;
+	        }
+	        else if (isIdentifier(lineToProcess[index]) && isIdentifier(lineToProcess[index+1]))
+	        {
+	        	cout << "comma is missing" << endl;
+	        	index++;
+	        	intact = false;
+	        }
+	        else if (lineToProcess[index] == ",") 
+	        { 
+	        	cout << "too many commas, can't process rest of line" << endl; 
+	        	intact = false;
+	        	break;
+	        }
+	        else if (isIdentifier(lineToProcess[index]) && lineToProcess[index+1].compare("integer") == 0) 
+	        {
+	        	cout << "colon is missing" << endl;
+	        	index += 2;
+	        	intact = false;
+	        }
+	        else if (isIdentifier(lineToProcess[index]) && lineToProcess[index+1] != ":"
+	        	&& lineToProcess[index+2].compare("integer") == 0)
+	        {
+	        	cout << "colon is missing" << endl;
+	        	index += 2;
+	        	intact = false;
+	        }
+	        else if(lineToProcess[index].compare("integer") == 0) 
+	        {
+	        	if (lineToProcess[index-1] != ":") 
+	        	{
+	        		cout << "colon is missing" << endl;
+		        	index++;
+		        	intact = false;
+	        	}
+	        	else break;
+	        }
+	        else index++;
+	    }
+
+		lineToProcess.clear();
+	}
+
+	// Sort and get only unique variables.
+	sort(variables.begin(), variables.end());
+	auto last = unique(variables.begin(), variables.end());
+	variables.erase(last, variables.end());
+
+	return variables;
+}
+
+// Function to check if semicolons are at the end of each line that should have one.
+bool checkSemiColons(vector<string> lines)
+{
+	bool semiColonsAfterLine = true;
+	for (auto&& i : lines)
+	{
+		//cout << "i: " << i << endl;
+		if (i.find("begin") != -1 || i.find("var") != -1 || i.find("end.") != -1) continue;
+	    int len = i.length();
+	    if (i[len-1] != ';') { cout << "semicolon is missing" << endl; semiColonsAfterLine = false; }
+	}
+
+	return semiColonsAfterLine;
 }
 
 vector<string> findVariablesUsed(vector<string> lines)
@@ -507,8 +597,8 @@ int main()
 {
 	initiateParsing();	// Call function to initiate part one.
 
-	bool startPartThree;
-	bool keywordsIntact;
+	bool startPartThree, keywordsIntact, semiColons;
+	bool varDeclarationsIntact = true;
 	deque<string> queue;
 	vector<string> lines;
 	fstream fIn("finalp2.txt", ios::in);
@@ -516,7 +606,7 @@ int main()
 
 	// Reserved word list; this is needed so we can differentiate between terminals and non-terminals.
 	vector<string> reserved = {"program", "begin", "var", "end.", "integer", "print"};
-	vector<string> variables;
+	vector<string> variablesDeclared;
 	vector<string> variablesUsed;
 
 	// Get every line in the text file and insert the whole line as a string.
@@ -524,38 +614,35 @@ int main()
 	fIn.close();
 
 	keywordsIntact = detectKeywords(lines);
-	variables = ensureVarDeclarations(lines);
+	semiColons = checkSemiColons(lines);
 
-	if (keywordsIntact)
+	if (keywordsIntact && semiColons)
 	{
-		variablesUsed = findVariablesUsed(lines);
-		checkVariables(variables, variablesUsed);
+		// Call to this changes varDeclarationsIntact.
+		variablesDeclared = ensureVarDeclarations(lines, varDeclarationsIntact);	
 
-		// Insert reserved words whole and non-reserved words character by character. 
-		for(auto&& i : lines)
+		if (varDeclarationsIntact)
 		{
-			stringstream ss(i);
-			string temp;
-			while(ss >> temp)
+			variablesUsed = findVariablesUsed(lines);
+			checkVariables(variablesDeclared, variablesUsed);
+
+			// Insert reserved words whole and non-reserved words character by character. 
+			for(auto&& i : lines)
 			{
-				if (find(reserved.begin(), reserved.end(), temp) != reserved.end())
+				stringstream ss(i);
+				string temp;
+				while(ss >> temp)
 				{
-					queue.push_back(temp);
-				}
-				else
-				{
-					for(auto&& k : temp)
-					{
-						queue.push_back(string(1,k));
-					}
+					if (find(reserved.begin(), reserved.end(), temp) != reserved.end()) queue.push_back(temp);
+					else for(auto&& k : temp) queue.push_back(string(1,k));
 				}
 			}
+			queue.push_back("$");
+
+			startPartThree = parsingTable(queue);
+
+			if (startPartThree) initiateConversion();	// Call to function to initiate part three.
 		}
-		queue.push_back("$");
-
-		startPartThree = parsingTable(queue);
-
-		if (startPartThree) initiateConversion();	// Call to function to initiate part three.
 	}
 
 	return 0;
