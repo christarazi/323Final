@@ -10,21 +10,22 @@
 
 using namespace std;
 
+// Function to convert all statements in the program to C++ syntax.
 void parseStatements(deque<string> lines, deque<string> & outputLines)
 {
 	vector<string> parsePrint;
 	regex statements("^([a-z]*?[A-Z]?[0-9]*?[ ]?=[ ]?.*)");
 	regex printStatement("^print[ ]?\\(([ ]?[']?[ ]?.+?[ ]?[']?)\\)");
 	smatch matches;
-	for (auto&& i : lines)
+	for (auto&& line : lines)
 	{
-	    if (regex_search(i, matches, statements)) 
+	    if (regex_search(line, matches, statements)) 
 	    	outputLines.push_back("\t" + matches[0].str());
-	    if (regex_search(i, matches, printStatement))
+	    if (regex_search(line, matches, printStatement))
 	    {
 	    	string build = "\tcout<<";
-	    	i = &i[6];
-	    	parsePrint.push_back(i);
+	    	line = &line[6];
+	    	parsePrint.push_back(line);
 	    	for (auto&& k : parsePrint)
 	    	{
 	    	    for (auto&& ch : k)
@@ -37,13 +38,14 @@ void parseStatements(deque<string> lines, deque<string> & outputLines)
 	    	    }
 	    	}
 	    	int index = build.find("  ;");
-	    	build.replace(index, 10, " << endl ;");
+	    	build.replace(index, 10, " << endl ;");	// 10 is the length of " << endl ;".
 	    	outputLines.push_back(build);
 	    	parsePrint.pop_back();
 	    } 
 	}
 }
 
+// Function that gathers all conversions made and outputs to the final text file.
 void initiateConversion()
 {
 	fstream fIn("finalp2.txt", ios::in);
@@ -60,13 +62,13 @@ void initiateConversion()
 	fOut << "int main()" << endl;
 	fOut << "{" << endl;
 
-	for (auto&& i : lines)
+	for (auto&& line : lines)
 	{
-		int index = i.find(": integer");
+		int index = line.find(": integer");
 	    if (index != -1)
 	    {
 	    	string temp = "\tint ";
-	    	for (int j = 0; j < index; j++) temp += i[j];
+	    	for (int j = 0; j < index; j++) temp += line[j];
 	    	temp += ";";
 	    	outputLines.push_back(temp);
 	    	break;
@@ -78,8 +80,5 @@ void initiateConversion()
 	outputLines.push_back("\treturn 0 ; ");
 	outputLines.push_back("}");
 
-	for (auto&& i : outputLines)
-	{
-		fOut << i << endl;
-	}
+	for (auto&& line : outputLines) fOut << line << endl;
 }

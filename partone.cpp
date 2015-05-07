@@ -24,8 +24,7 @@ void initiateParsing()
 	fOut.close();
 }
 
-// Function to parse input file.
-// Takes a queue by reference.
+// Function to parse input file. Takes a queue by reference.
 void parseFile(deque<string> & q)
 {
 	fstream fIn, fOut;
@@ -43,7 +42,7 @@ void parseFile(deque<string> & q)
 		regex comments("(((\\(\\*.*\\*\\))|(\\(\\*.*))|(.*\\*\\)))");	// Looks for comments.
 		regex reservedWords("((var)|(begin)|(BEGIN)|(VAR))");	// Looks for reserved words.
 		regex endWord("(end\\.)|(END\\.)");	// Looks for "end.".
-		regex everyLine("^(?!var|VAR|BEGIN|begin).*?$");	// Matches every line except ones that start with reserved words.
+		regex everyLineMustBeNewLine("^(?!var|VAR|BEGIN|begin).*?$");	// Matches every line except ones that start with reserved words.
 
         // Replaces 'line' with single whitespace.
 		line = regex_replace(line, whitespace, " ");			
@@ -58,7 +57,7 @@ void parseFile(deque<string> & q)
 		// Replaces 'line' with the itself plus newline.
 		line = regex_replace(line, reservedWords, line+"\n");
 		// Replaces 'line' with the itself plus newline. Makes sure every line (even w/o ';') has its own line.
-		line = regex_replace(line, everyLine, line+"\n");
+		line = regex_replace(line, everyLineMustBeNewLine, line+"\n");
 
 		// Check if the lines starts with a comment, if so, proceed; does not get pushed to queue.
 		if (line[0] == '(' && line[1] == '*')

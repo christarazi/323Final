@@ -25,46 +25,35 @@ bool isIdentifier(string s)
 	if (s[0] == '_' || isalpha(s[0]))
 	{
 		int space = s.find(" ");
-		if (space == -1)
-		{
-			return true;
-		}
+		if (space == -1) return true;
 		else return false;
 	}
 	else return false;
 }
 
-// Function to push to stack.
+// Function to push to stack, reversing the order of the string parameter.
 void pushToStack(string cell, vector<string> & s)
 {
 	// Reverse 'cell'.
-	stringstream ss(cell);
 	stack<string> reversedString;
+	stringstream ss(cell);
 	string temp;
-	while (ss >> temp)
-	{
-		reversedString.push(temp);
-	}
-	cout << "Pushing: ";
+	while (ss >> temp) reversedString.push(temp);
+	//cout << "Pushing: ";
  	while (!reversedString.empty())
  	{
  		string temp = reversedString.top(); reversedString.pop();
  		temp.erase(remove(temp.begin(), temp.end(), ' '), temp.end());
  		s.push_back(temp);
- 		cout << temp << " ";
+ 		//cout << temp << " ";
  	}
- 	cout << "\n";
 }
 
 // Function to show the stack.
 void showStack(vector<string> s)
 {
 	cout << endl;
-	for (auto&& i : s)
-	{
-		cout << i;
-	}
-	cout << endl;
+	for (auto&& i : s) cout << i;
 }
 
 // Function to detect certain mandatory keywords. Takes vector by reference.
@@ -192,54 +181,12 @@ bool detectKeywords(vector<string> & lines)
 // Function to check the line after the "var" line in text file.
 vector<string> ensureVarDeclarations(vector<string> lines, bool & intact)
 {
-	/*
-	int index = 0;
-	for (auto&& i : lines)
-	{
-		if (i.find("integer") != -1) break;
-		else index++;
-	}
-	string temp = lines[index];
-	int integerKeyword = temp.find("integer");
-
-	stringstream ss(temp);	// tokenize temp string
-	string token;
-	vector<string> v;
-	while(ss >> token) v.push_back(token);	// insert each token in a vector
-
-	vector<string> variables;
-	if (integerKeyword != -1)
-	{
-		int IDs = 0;
-		int commas = 0;
-		int colons = 0;
-		for (int i = 0; i < v.size(); i++)
-		{
-			if (isIdentifier(v[i])) { IDs++; variables.push_back(v[i]); } 
-			else if (v[i] == ",") commas++;
-			else if (v[i] == ":") colons++;
-		}
-
-		if (IDs - commas > 1) cout << "more than one comma is missing\n";
-		else if (IDs - commas < 1 && (IDs - commas) != 1) cout << "too many commas\n";
-
-		if (colons != 1) cout << "colon is missing\n";
-
-		if (v[v.size()-1] != ";") cout << "semicolon is missing\n";
-	}
-	
-	// Sort and get only unique variables.
-	sort(variables.begin(), variables.end());
-	auto last = unique(variables.begin(), variables.end());
-	variables.erase(last, variables.end());
-
-	return variables;
-	*/
-
 	vector<string> variables;
 	vector<string> totalLines;
 	vector<string> lineToProcess;
+
 	for (auto&& i : lines) if (i.find("integer") != -1) totalLines.push_back(i);
+
 	for (auto&& i : totalLines)
 	{
 		stringstream ss(i);
@@ -250,7 +197,7 @@ vector<string> ensureVarDeclarations(vector<string> lines, bool & intact)
 	    	if (isIdentifier(temp)) variables.push_back(temp);	// Pushes variables for later use.
 	    }
 
-	    // Handling the var declarations line here.
+	    // Handling the var declarations line.
 	    for (int index = 0; index < lineToProcess.size();)
 	    {
 	        if (isIdentifier(lineToProcess[index]) && lineToProcess[index+1] == ",") index += 2;
@@ -314,9 +261,10 @@ vector<string> ensureVarDeclarations(vector<string> lines, bool & intact)
 bool checkSemiColons(vector<string> lines)
 {
 	bool semiColonsAfterLine = true;
+
 	for (auto&& i : lines)
 	{
-		//cout << "i: " << i << endl;
+		// Lines with begin, var, and end. don't need semicolons.
 		if (i.find("begin") != -1 || i.find("var") != -1 || i.find("end.") != -1) continue;
 	    int len = i.length();
 	    if (i[len-1] != ';') { cout << "semicolon is missing" << endl; semiColonsAfterLine = false; }
@@ -325,9 +273,11 @@ bool checkSemiColons(vector<string> lines)
 	return semiColonsAfterLine;
 }
 
+// Function that finds every variable used in assignments or print statements.
 vector<string> findVariablesUsed(vector<string> lines)
 {
 	vector<string> variables;
+
 	for (auto&& i : lines)
 	{
 		if (i.find("=") != -1 || i.find("print") != -1) 
@@ -336,7 +286,7 @@ vector<string> findVariablesUsed(vector<string> lines)
 			string temp;
 			while (ss >> temp)
 			{
-				// Handles quotes inside the print statement.
+				// Handles quotes inside the print statement. We don't want what's inside quotes.
 				if (temp.find("'") != -1)
 				{
 					ss >> temp;
@@ -356,6 +306,7 @@ vector<string> findVariablesUsed(vector<string> lines)
 	return variables;
 }
 
+// Function show the differences between declared and used variables.
 void checkVariables(vector<string> variables, vector<string> usedVars)
 {
 	vector<string> differences;
@@ -367,10 +318,13 @@ void checkVariables(vector<string> variables, vector<string> usedVars)
 	for (auto&& i : differences) cout << "unidentified variable " + i << endl;
 }
 
+// Function run the LL(1) parsing.
 bool parsingTable(deque<string> inputQueue)
 {
-	// Initializing two dimensional map with the grammar.
-	// 'table' is a map of a map of strings.
+	/* 
+	Initializing two dimensional map with the grammar.
+	'table' is a map of a map of strings.
+	//*/
 	map<string, map<string, string>> table
 	{
 		{"P",
@@ -499,9 +453,12 @@ bool parsingTable(deque<string> inputQueue)
  	vector<string> stateStack;
 	stateStack.push_back("$");
 	stateStack.push_back("P");
-	// current holds the current token from the input.
-	// topOfStack holds the token from the stateStack.
-	// cell holds the data which we retrieve from the table.
+
+	/* 
+	current holds the current token from the input.
+	topOfStack holds the token from the stateStack.
+	cell holds the data which we retrieve from the table.
+	//*/
 	string current; string topOfStack; string cell;
 
 	string firstSingleQuote = "'";
@@ -529,39 +486,43 @@ bool parsingTable(deque<string> inputQueue)
 
 		topOfStack = stateStack.back();
 		stateStack.pop_back();
+
 		if (topOfStack.compare("<string>") == 0) continue;
 
 		while (current.compare(topOfStack) == 0)
 		{
 			match:
-			cout << "Matched first! - " << current << " " << topOfStack << endl;
+			//cout << "Matched first! - " << current << " " << topOfStack << endl;
 			current = inputQueue.front();
 			inputQueue.pop_front();
 
 			topOfStack = stateStack.back();
 			stateStack.pop_back();
+
 			if (topOfStack.compare("<string>") == 0) goto end;
 			if (current.compare("$") == 0 && topOfStack.compare("$") == 0) goto accepted;
 		}
 		
 		cell = table[topOfStack][current];
-		cout << "Getting - table[" << topOfStack + "][" + current + "] = " + cell << endl;
+		//cout << "Getting - table[" << topOfStack + "][" + current + "] = " + cell << endl;
 
 		if (cell.length() == 0)
 		{
-			cout << "ERROR" << endl; accepted = false;
+			cout << endl << "ERROR" << endl; accepted = false;
 			break;
 		}
 		else if (cell.compare("λ") == 0)
 		{
 			while (cell.compare("λ") == 0)
 			{
-				cout << "We found lamda!" << endl;
+				//cout << "We found lamda!" << endl;
 				topOfStack = stateStack.back();
 				stateStack.pop_back();
+
 				if (topOfStack.compare("<string>") == 0) goto end;
+				
 				cell = table[topOfStack][current];
-				cout << "Getting - table[" << topOfStack + "][" + current + "] = " + cell << endl;
+				//cout << "Getting - table[" << topOfStack + "][" + current + "] = " + cell << endl;
 				if (cell.compare("λ") != 0 && cell.length() != 0) 
 				{
 					pushToStack(cell, stateStack);
@@ -569,7 +530,7 @@ bool parsingTable(deque<string> inputQueue)
 				}
 				if (current.compare(topOfStack) == 0)
 				{
-					cout << "Going to match!" << endl;
+					//cout << "Going to match!" << endl;
 					goto match;
 				}
 			}
@@ -580,17 +541,17 @@ bool parsingTable(deque<string> inputQueue)
 			showStack(stateStack);
 		}
 		end:
-		cout << "Restarting!" << endl;
+		//cout << "Restarting!" << endl;
 		goto top;
 
 		accepted:
-		cout << "Accepted!" << endl;
+		cout << endl << "Accepted!" << endl;
 		accepted = true; break;
 	}
 
 	// If 'accepted' is true, program is accepted.
-	if (accepted) { cout << "Program accepted." << endl; return true; }
-	else 		  { cout << "Program denied." << endl; return false; }
+	if (accepted) { cout << endl << "Program accepted." << endl; return true; }
+	else 		  { cout << endl << "Program denied." << endl; return false; }
 }
 
 int main()
@@ -599,8 +560,6 @@ int main()
 
 	bool startPartThree, keywordsIntact, semiColons;
 	bool varDeclarationsIntact = true;
-	deque<string> queue;
-	vector<string> lines;
 	fstream fIn("finalp2.txt", ios::in);
 	string line;
 
@@ -608,6 +567,9 @@ int main()
 	vector<string> reserved = {"program", "begin", "var", "end.", "integer", "print"};
 	vector<string> variablesDeclared;
 	vector<string> variablesUsed;
+
+	deque<string> inputFromTextFile;
+	vector<string> lines;
 
 	// Get every line in the text file and insert the whole line as a string.
 	while(getline(fIn, line)) lines.push_back(line);
@@ -633,13 +595,13 @@ int main()
 				string temp;
 				while(ss >> temp)
 				{
-					if (find(reserved.begin(), reserved.end(), temp) != reserved.end()) queue.push_back(temp);
-					else for(auto&& k : temp) queue.push_back(string(1,k));
+					if (find(reserved.begin(), reserved.end(), temp) != reserved.end()) inputFromTextFile.push_back(temp);
+					else for(auto&& k : temp) inputFromTextFile.push_back(string(1,k));
 				}
 			}
-			queue.push_back("$");
+			inputFromTextFile.push_back("$");
 
-			startPartThree = parsingTable(queue);
+			startPartThree = parsingTable(inputFromTextFile);	// Begin parsing using LL(1).
 
 			if (startPartThree) initiateConversion();	// Call to function to initiate part three.
 		}
