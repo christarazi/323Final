@@ -61,11 +61,11 @@ bool detectKeywords(vector<string> & lines)
 {
 	bool keywordsIntact = true;
 	// Checking for program keyword.
-	if (find(lines.begin(), lines.begin()+1, "program") == lines.begin()+1)
+	if (lines[0].find("program") == -1)
 	{
-		auto programUpper = find(lines.begin(), lines.begin()+1, "PROGRAM");
+		int programUpper = lines[0].find("PROGRAM");
 		
-		if (programUpper == lines.end()) { cout << "program is missing\n"; keywordsIntact = false; }
+		if (programUpper == -1) { cout << "program is missing\n"; keywordsIntact = false; }
 		else
 		{
 			int index = lines[0].find("PROGRAM");

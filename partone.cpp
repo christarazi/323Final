@@ -20,7 +20,10 @@ void initiateParsing()
 	parseFile(q);
 
 	// Iterate through queue to write to output file.
-	for (auto&& i : q) if (i != "\n") fOut << i;
+	for (auto&& i : q)
+	{
+		if (i.length() > 1) fOut << i;
+	}
 	fOut.close();
 }
 
@@ -35,29 +38,45 @@ void parseFile(deque<string> & q)
 
 	while (getline(fIn, line))
 	{
+		smatch match;
 		// Declare regex patterns.
-		regex whitespace("[\\s]+");			// Looks for one or more whitespace chars.
+		regex whitespace("(\\s+)");			// Looks for one or more whitespace chars.
 		regex leadingSpace("^(\\s+)");			// Looks for one or more leading spaces.
+		regex trailingSpace("(\\s+)$");			// Looks for one or more trailing spaces.
 		regex semiColonNewLine("([ \t]?;[ \t]?)");	// Looks for ';' surrounded by zero or more spaces.
-		regex comments("(((\\(\\*.*\\*\\))|(\\(\\*.*))|(.*\\*\\)))");	// Looks for comments.
-		regex reservedWords("((var)|(begin)|(BEGIN)|(VAR))");	// Looks for reserved words.
-		regex endWord("(end\\.)|(END\\.)");	// Looks for "end.".
-		regex everyLineMustBeNewLine("^(?!var|VAR|BEGIN|begin).*?$");	// Matches every line except ones that start with reserved words.
+		regex comments("(\\(\\*.*)|(\\(\\*.*\\))|(.*\\*\\))");	// Looks for comments.
+		regex reservedWords("((var[\\s]+)|(begin[\\s]+)|(BEGIN[\\s]+)|(VAR[\\s]+))");	// Looks for reserved words.
+		regex endWord("(end\\.[\\s]+)|(END\\.[\\s]+)");	// Looks for "end.".
+		regex everyLineMustBeNewLine("^(?!var[\\s]+|VAR[\\s]+|BEGIN[\\s]+|begin[\\s]+).*?$");	// Matches every line except ones that start with reserved words.
 
         // Replaces 'line' with single whitespace.
 		line = regex_replace(line, whitespace, " ");			
         // Replaces 'line' in order to not have leading spaces.
 		line = regex_replace(line, leadingSpace, "");
+		// Replaces 'line' in order to not have trailing spaces.
+		line = regex_replace(line, trailingSpace, "");
         // Replaces 'line' with lines that have semicolons then newline.
 		line = regex_replace(line, semiColonNewLine, " ;\n");
 		// Replaces 'line' with "end." plus newline.
 		line = regex_replace(line, endWord, "end.\n");
 		// Replaces 'line' with nothing because of comments.
+
+		while (line.find("(*") != -1 && line.find("*)") == -1)
+		{
+			getline(fIn, line);
+			while (line.find("(*") == -1 && line.find("*)") == 	-1) getline(fIn, line);
+			if (line.find("(*") == -1 && line.find("*)") != -1)
+			{
+				getline(fIn, line);
+				break;
+			}
+		}
+
 		line = regex_replace(line, comments, "");
 		// Replaces 'line' with the itself plus newline.
-		line = regex_replace(line, reservedWords, line+"\n");
+		line = regex_replace(line, reservedWords, line+'\n');
 		// Replaces 'line' with the itself plus newline. Makes sure every line (even w/o ';') has its own line.
-		line = regex_replace(line, everyLineMustBeNewLine, line+"\n");
+		line = regex_replace(line, everyLineMustBeNewLine, line+'\n');
 
 		// Check if the lines starts with a comment, if so, proceed; does not get pushed to queue.
 		if (line[0] == '(' && line[1] == '*')
